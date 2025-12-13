@@ -1,0 +1,42 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Ambil source code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Build Docker image (DI GITHUB ACTIONS)
+      - name: Build Docker image
+        run: |
+          docker build -t lomba/${{ github.repository_name }} .
+
+      # 3️⃣ Kirim image ke VPS (TANPA REGISTRY)
+      - name: Send Docker image to VPS
+        run: |
+          docker save lomba/${{ github.repository_name }} \
+          | ssh -o StrictHostKeyChecking=no \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            docker load
+
+      # 4️⃣ Jalankan container di VPS
+      - name: Run container on VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            docker stop ${{ github.repository_name }} || true
+            docker rm ${{ github.repository_name }} || true
+            docker run -d \
+              --name ${{ github.repository_name }} \
+              --restart unless-stopped \
+              lomba/${{ github.repository_name }}

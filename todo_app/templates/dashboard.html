@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1><i class="fas fa-clipboard-list"></i> My Tasks</h1>
+        <div class="header-actions">
+            <div class="view-switcher">
+                <button class="view-btn active" data-view="list" title="List View">
+                    <i class="fas fa-list"></i>
+                </button>
+                <button class="view-btn" data-view="kanban" title="Kanban View">
+                    <i class="fas fa-columns"></i>
+                </button>
+                <button class="view-btn" data-view="timeline" title="Timeline View">
+                    <i class="fas fa-stream"></i>
+                </button>
+            </div>
+            <button class="btn btn-primary" onclick="openTodoModal()">
+                <i class="fas fa-plus"></i> Add Task
+            </button>
+        </div>
+    </div>
+    
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label>Status:</label>
+            <select id="filter-status">
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="in-progress">In Progress</option>
+                <option value="completed">Completed</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Priority:</label>
+            <select id="filter-priority">
+                <option value="all">All</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Sort by:</label>
+            <select id="sort-by">
+                <option value="created_at">Date Created</option>
+                <option value="deadline">Deadline</option>
+                <option value="priority">Priority</option>
+                <option value="title">Title</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- List View -->
+    <div class="view-container" id="list-view">
+        <div class="todo-list" id="todo-list">
+            <!-- Todos will be loaded here -->
+        </div>
+    </div>
+    
+    <!-- Kanban View -->
+    <div class="view-container hidden" id="kanban-view">
+        <div class="kanban-board">
+            <div class="kanban-column" data-status="pending">
+                <div class="column-header">
+                    <h3><i class="fas fa-clock"></i> Pending</h3>
+                    <span class="count" id="pending-count">0</span>
+                </div>
+                <div class="kanban-cards" id="kanban-pending"></div>
+            </div>
+            <div class="kanban-column" data-status="in-progress">
+                <div class="column-header">
+                    <h3><i class="fas fa-spinner"></i> In Progress</h3>
+                    <span class="count" id="in-progress-count">0</span>
+                </div>
+                <div class="kanban-cards" id="kanban-in-progress"></div>
+            </div>
+            <div class="kanban-column" data-status="completed">
+                <div class="column-header">
+                    <h3><i class="fas fa-check-circle"></i> Completed</h3>
+                    <span class="count" id="completed-count">0</span>
+                </div>
+                <div class="kanban-cards" id="kanban-completed"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Timeline View -->
+    <div class="view-container hidden" id="timeline-view">
+        <div class="timeline" id="timeline">
+            <!-- Timeline items will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- Todo Form Template (hidden) -->
+<template id="todo-form-template">
+    <form id="todo-form" onsubmit="saveTodo(event)">
+        <input type="hidden" id="todo-id" name="id">
+        
+        <div class="form-group">
+            <label for="todo-title">Title *</label>
+            <input type="text" id="todo-title" name="title" required placeholder="Task title">
+        </div>
+        
+        <div class="form-group">
+            <label for="todo-description">Description</label>
+            <textarea id="todo-description" name="description" rows="3" placeholder="Task description"></textarea>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="todo-status">Status</label>
+                <select id="todo-status" name="status">
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="todo-priority">Priority</label>
+                <select id="todo-priority" name="priority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="todo-deadline">Deadline</label>
+            <input type="datetime-local" id="todo-deadline" name="deadline">
+        </div>
+        
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Task</button>
+        </div>
+    </form>
+</template>
+
+<!-- Share Form Template -->
+<template id="share-form-template">
+    <div id="share-container">
+        <div class="shared-users-list" id="shared-users-list">
+            <!-- Shared users will be loaded here -->
+        </div>
+        
+        <form id="share-form" onsubmit="shareItem(event)">
+            <input type="hidden" id="share-item-type" name="item_type">
+            <input type="hidden" id="share-item-id" name="item_id">
+            
+            <div class="form-row">
+                <div class="form-group flex-grow">
+                    <label for="share-user">Share with User</label>
+                    <select id="share-user" name="shared_with_id" required>
+                        <option value="">Select a user...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="share-permission">Permission</label>
+                    <select id="share-permission" name="permission">
+                        <option value="view">View Only</option>
+                        <option value="edit">Can Edit</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
+                <button type="submit" class="btn btn-primary">Share</button>
+            </div>
+        </form>
+    </div>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

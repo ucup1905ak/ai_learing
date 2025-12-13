@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Users & Sharing - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="users-page">
+    <div class="page-header">
+        <h1><i class="fas fa-users"></i> Users & Sharing</h1>
+    </div>
+    
+    <div class="users-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-user-friends"></i> All Users</h3>
+            </div>
+            <div class="card-body">
+                <div class="users-list" id="all-users-list">
+                    <!-- Users will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-share-alt"></i> Items Shared With Me</h3>
+            </div>
+            <div class="card-body">
+                <div class="shared-items-tabs">
+                    <button class="tab-btn active" data-tab="shared-todos">Todos</button>
+                    <button class="tab-btn" data-tab="shared-events">Events</button>
+                </div>
+                
+                <div class="tab-content active" id="shared-todos">
+                    <div class="shared-list" id="shared-todos-list">
+                        <!-- Shared todos will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="shared-events">
+                    <div class="shared-list" id="shared-events-list">
+                        <!-- Shared events will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-share"></i> My Shared Items</h3>
+        </div>
+        <div class="card-body">
+            <div class="my-shared-tabs">
+                <button class="tab-btn active" data-tab="my-shared-todos">My Shared Todos</button>
+                <button class="tab-btn" data-tab="my-shared-events">My Shared Events</button>
+            </div>
+            
+            <div class="tab-content active" id="my-shared-todos">
+                <div class="my-shared-list" id="my-todos-list">
+                    <!-- My todos with sharing info will be loaded here -->
+                </div>
+            </div>
+            
+            <div class="tab-content" id="my-shared-events">
+                <div class="my-shared-list" id="my-events-list">
+                    <!-- My events with sharing info will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/users.js') }}"></script>
+{% endblock %}

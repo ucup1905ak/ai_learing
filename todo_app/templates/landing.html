@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity Enhanced - Future of Todo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div class="overlay">
+        <nav class="navbar">
+            <div class="logo">Todo<span class="highlight">Next</span></div>
+            <div class="nav-links">
+                <a href="{{ url_for('auth.login') }}" class="btn-text">Login</a>
+                <a href="{{ url_for('auth.register') }}" class="btn-primary">Get Started</a>
+            </div>
+        </nav>
+        
+        <header class="hero">
+            <h1 class="hero-title">Focus on what <br><span class="gradient-text">Matters.</span></h1>
+            <p class="hero-subtitle">Experience the next generation of task management. <br> 3D-accelerated productivity for the modern mind.</p>
+            <div class="cta-group">
+                <a href="{{ url_for('auth.register') }}" class="btn-cta">Start Free Trial</a>
+                <a href="{{ url_for('auth.login') }}" class="btn-secondary-cta">Log In</a>
+            </div>
+        </header>
+        
+        <footer class="landing-footer">
+            <p>&copy; 2025 TodoNext. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+</body>
+</html>

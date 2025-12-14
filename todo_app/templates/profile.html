@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="page-header">
+        <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+    </div>
+    
+    <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <div class="card-body">
+            <div class="profile-header" style="text-align: center; margin-bottom: 30px;">
+                <div class="profile-avatar" style="width: 100px; height: 100px; margin: 0 auto 15px; border-radius: 50%; overflow: hidden; background: var(--bg-light); border: 2px solid var(--primary-color);">
+                    {% if user.avatar and user.avatar != 'default_avatar.png' %}
+                        <img src="{{ url_for('static', filename='uploads/avatars/' + user.avatar) }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: var(--primary-color); color: white;">
+                            {{ user.username[0].upper() }}
+                        </div>
+                    {% endif %}
+                </div>
+                <h2>{{ user.username }}<span style="color: var(--text-muted); font-size: 0.8em;">#{{ user.discriminator }}</span></h2>
+                <p style="color: var(--text-muted);">{{ user.email }}</p>
+            </div>
+            
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="avatar">Change Avatar</label>
+                    <input type="file" id="avatar" name="avatar" accept="image/*">
+                </div>
+                
+                <div class="form-group">
+                    <label for="about_me">About Me</label>
+                    <textarea id="about_me" name="about_me" rows="4" placeholder="Tell us about yourself...">{{ user.about_me or '' }}</textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

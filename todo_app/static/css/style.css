@@ -1,29 +1,67 @@
 /* ==================== CSS Variables ==================== */
 :root {
-    --primary-color: #3498db;
-    --primary-dark: #2980b9;
-    --secondary-color: #6c757d;
-    --success-color: #27ae60;
-    --warning-color: #f39c12;
-    --danger-color: #e74c3c;
-    --info-color: #17a2b8;
+    /* Brand Colors */
+    --primary-color: #00f3ff;
+    --primary-dark: #00c4ce;
+    --secondary-color: #bc13fe;
+    --secondary-dark: #8a0eab;
     
-    --bg-dark: #1a1a2e;
-    --bg-sidebar: #16213e;
-    --bg-card: #0f3460;
-    --bg-light: #1f4068;
-    --bg-input: #0a1929;
+    /* Status Colors */
+    --success-color: #00ff9d;
+    --success-dark: #00cc7d;
+    --warning-color: #ffb800;
+    --warning-dark: #cc9300;
+    --danger-color: #ff0055;
+    --danger-dark: #cc0044;
+    --info-color: #00f3ff;
+    --info-dark: #00c4ce;
     
+    /* Background Colors */
+    --bg-dark: #050505;
+    --bg-sidebar: #0a0a0a;
+    --bg-card: #111111;
+    --bg-light: #1a1a1a;
+    --bg-input: #151515;
+    --bg-hover: rgba(0, 243, 255, 0.1);
+    
+    /* Transparent Backgrounds */
+    --bg-primary-light: rgba(0, 243, 255, 0.1);
+    --bg-success-light: rgba(0, 255, 157, 0.1);
+    --bg-warning-light: rgba(255, 184, 0, 0.1);
+    --bg-danger-light: rgba(255, 0, 85, 0.1);
+    --bg-info-light: rgba(0, 243, 255, 0.1);
+    --bg-purple-light: rgba(188, 19, 254, 0.1);
+
+    /* Text Colors */
     --text-primary: #ffffff;
-    --text-secondary: #a0aec0;
-    --text-muted: #718096;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666666;
+    --text-inverse: #000000;
     
-    --border-color: #2d3748;
-    --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
+    /* Borders & Shadows */
+    --border-color: #333333;
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --border-radius-xl: 15px;
+    --border-radius-round: 50px;
     
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.6);
+    
+    /* Layout */
     --sidebar-width: 260px;
+    --header-height: 60px;
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 15px;
+    --spacing-lg: 20px;
+    --spacing-xl: 30px;
+    
+    /* Transitions */
     --transition: all 0.3s ease;
+    --transition-fast: all 0.15s ease;
 }
 
 /* ==================== Reset & Base ==================== */
@@ -231,10 +269,10 @@ input[type="time"],
 textarea,
 select {
     width: 100%;
-    padding: 12px 15px;
+    padding: 10px 15px;
     background: var(--bg-input);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: var(--border-radius-md);
     color: var(--text-primary);
     font-size: 1rem;
     transition: var(--transition);
@@ -258,6 +296,9 @@ input[type="color"] {
     height: 40px;
     padding: 5px;
     cursor: pointer;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    background: var(--bg-input);
 }
 
 .checkbox-label {
@@ -303,11 +344,12 @@ input[type="color"] {
     gap: 8px;
     padding: 10px 20px;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--border-radius-md);
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
+    line-height: 1.5;
 }
 
 .btn-primary {
@@ -317,8 +359,8 @@ input[type="color"] {
 
 .btn-primary:hover {
     background: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary {
@@ -327,7 +369,8 @@ input[type="color"] {
 }
 
 .btn-secondary:hover {
-    background: #5a6268;
+    background: var(--secondary-dark);
+    transform: translateY(-1px);
 }
 
 .btn-success {
@@ -336,7 +379,8 @@ input[type="color"] {
 }
 
 .btn-success:hover {
-    background: #219a52;
+    background: var(--success-dark);
+    transform: translateY(-1px);
 }
 
 .btn-danger {
@@ -345,18 +389,25 @@ input[type="color"] {
 }
 
 .btn-danger:hover {
-    background: #c0392b;
+    background: var(--danger-dark);
+    transform: translateY(-1px);
 }
 
 .btn-icon {
     padding: 10px;
     background: var(--bg-light);
     color: var(--text-primary);
-    border-radius: 8px;
+    border-radius: var(--border-radius-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
 }
 
-.btn-icon:hover {
-    background: var(--primary-color);
+.btn-icon:hover,
+.btn-icon.active {
+    background: var(--bg-hover);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
 .btn-block {

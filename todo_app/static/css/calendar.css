@@ -79,7 +79,7 @@
 }
 
 .calendar-day:hover {
-    background: rgba(52, 152, 219, 0.1);
+    background: var(--bg-hover);
     border: 1px solid var(--primary-color);
 }
 
@@ -88,7 +88,16 @@
 }
 
 .calendar-day.today {
-    background: rgba(52, 152, 219, 0.2);
+    background: var(--bg-primary-light);
+    border: 2px solid var(--primary-color);
+}
+
+.calendar-day.other-month {
+    opacity: 0.4;
+}
+
+.calendar-day.today {
+    background: rgba(52, 152, 219, 0.2); /* Keep as is or add var if needed, matches badge-in-progress bg */
     border: 2px solid var(--primary-color);
 }
 
@@ -233,12 +242,12 @@
 }
 
 .event-type.event {
-    background: rgba(52, 152, 219, 0.2);
+    background: var(--bg-primary-light);
     color: var(--primary-color);
 }
 
 .event-type.deadline {
-    background: rgba(231, 76, 60, 0.2);
+    background: var(--bg-danger-light);
     color: var(--danger-color);
 }
 

@@ -190,3 +190,162 @@ function populateUserSelect(selectId, users) {
         select.innerHTML += `<option value="${user.id}">${escapeHtml(user.username)} (${escapeHtml(user.email)})</option>`;
     });
 }
+
+// ==================== Project Functions ====================
+
+let projectsCache = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.body.classList.contains('main-content')) { // Only load if logged in
+        loadProjects();
+    }
+});
+
+async function loadProjects() {
+    try {
+        projectsCache = await apiRequest('/api/projects');
+        renderProjects();
+    } catch (error) {
+        console.error('Failed to load projects:', error);
+    }
+}
+
+function renderProjects() {
+    const container = document.getElementById('projects-list');
+    if (!container) return;
+    
+    if (projectsCache.length === 0) {
+        container.innerHTML = '<li style="font-size: 0.9rem; color: var(--text-muted); padding: 5px 0;">No projects yet.</li>';
+        return;
+    }
+    
+    container.innerHTML = projectsCache.map(p => `
+        <li style="margin-bottom: 5px;">
+            <a href="${url_for_js('views.dashboard')}?project_id=${p.id}" style="display: flex; align-items: center; gap: 10px; color: var(--text-secondary); font-size: 0.95rem;">
+                <span style="width: 10px; height: 10px; border-radius: 50%; background: ${p.color}; display: inline-block; flex-shrink: 0;"></span>
+                <span>${escapeHtml(p.title)}</span>
+            </a>
+        </li>
+    `).join('');
+}
+
+function openProjectModal(projectId = null) {
+    let title = projectId ? 'Edit Project' : 'Create New Project';
+    let content = `
+        <form id="project-form" onsubmit="saveProject(event)">
+            <input type="hidden" id="project-id" value="${projectId || ''}">
+            <div class="form-group">
+                <label for="project-title">Project Title *</label>
+                <input type="text" id="project-title" required placeholder="Enter project title">
+            </div>
+            <div class="form-group">
+                <label for="project-description">Description</label>
+                <textarea id="project-description" rows="3" placeholder="Project description"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="project-color">Color</label>
+                <input type="color" id="project-color" value="#00f3ff">
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Project</button>
+            </div>
+        </form>
+    `;
+    openModal(title, content);
+    
+    if (projectId) {
+        const project = projectsCache.find(p => p.id === projectId);
+        if (project) {
+            document.getElementById('project-title').value = project.title;
+            document.getElementById('project-description').value = project.description || '';
+            document.getElementById('project-color').value = project.color || '#00f3ff';
+        }
+    }
+}
+
+async function saveProject(event) {
+    event.preventDefault();
+    const id = document.getElementById('project-id').value;
+    const data = {
+        title: document.getElementById('project-title').value,
+        description: document.getElementById('project-description').value,
+        color: document.getElementById('project-color').value
+    };
+    
+    try {
+        if (id) {
+            await apiRequest(`/api/projects/${id}`, 'PUT', data); // Need PUT endpoint for projects
+            showNotification('Project updated successfully');
+        } else {
+            await apiRequest('/api/projects', 'POST', data);
+            showNotification('Project created successfully');
+        }
+        closeModal();
+        loadProjects();
+    } catch (error) {
+        // Error handled by apiRequest
+    }
+}
+
+// Helper to simulate Flask's url_for for JS
+function url_for_js(endpoint, params = {}) {
+    let url = '';
+    switch(endpoint) {
+        case 'views.dashboard': url = '/dashboard'; break;
+        // Add other endpoints as needed
+        default: url = '/';
+    }
+    if (Object.keys(params).length > 0) {
+        const query = new URLSearchParams(params).toString();
+        url += `?${query}`;
+    }
+    return url;
+}
+
+// ==================== Notifications ====================
+
+document.addEventListener('DOMContentLoaded', () => {
+    checkNotifications();
+    setInterval(checkNotifications, 30000); // Check every 30s
+});
+
+async function checkNotifications() {
+    try {
+        const notifs = await apiRequest('/api/notifications');
+        const badge = document.getElementById('notif-badge');
+        const list = document.getElementById('notif-dropdown');
+        
+        const unread = notifs.filter(n => !n.is_read);
+        
+        if (badge) {
+            badge.style.display = unread.length > 0 ? 'block' : 'none';
+        }
+        
+        if (list) {
+            if (notifs.length === 0) {
+                list.innerHTML = '<div style="padding: 10px; color: var(--text-muted);">No notifications</div>';
+            } else {
+                list.innerHTML = notifs.map(n => `
+                    <div style="padding: 10px; border-bottom: 1px solid var(--border-color); ${n.is_read ? 'opacity: 0.6;' : 'background: var(--bg-light);'} cursor: pointer;" onclick="markRead(${n.id})">
+                        <div>${escapeHtml(n.message)}</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px;">${formatDateTime(n.created_at)}</div>
+                    </div>
+                `).join('');
+            }
+        }
+    } catch (error) {
+        // Silent fail
+    }
+}
+
+function toggleNotifications() {
+    document.getElementById('notif-dropdown').classList.toggle('hidden');
+}
+
+async function markRead(id) {
+    try {
+        await apiRequest(`/api/notifications/${id}/read`, 'PUT');
+        checkNotifications();
+    } catch (error) {}
+}

@@ -8,13 +8,13 @@
         <h1><i class="fas fa-clipboard-list"></i> My Tasks</h1>
         <div class="header-actions">
             <div class="view-switcher">
-                <button class="view-btn active" data-view="list" title="List View">
+                <button class="btn btn-icon active" data-view="list" title="List View">
                     <i class="fas fa-list"></i>
                 </button>
-                <button class="view-btn" data-view="kanban" title="Kanban View">
+                <button class="btn btn-icon" data-view="kanban" title="Kanban View">
                     <i class="fas fa-columns"></i>
                 </button>
-                <button class="view-btn" data-view="timeline" title="Timeline View">
+                <button class="btn btn-icon" data-view="timeline" title="Timeline View">
                     <i class="fas fa-stream"></i>
                 </button>
             </div>
@@ -25,24 +25,6 @@
     </div>
     
     <div class="filter-bar">
-        <div class="filter-group">
-            <label>Status:</label>
-            <select id="filter-status">
-                <option value="all">All</option>
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <label>Priority:</label>
-            <select id="filter-priority">
-                <option value="all">All</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
-            </select>
-        </div>
         <div class="filter-group">
             <label>Sort by:</label>
             <select id="sort-by">
@@ -100,6 +82,7 @@
 <template id="todo-form-template">
     <form id="todo-form" onsubmit="saveTodo(event)">
         <input type="hidden" id="todo-id" name="id">
+        <input type="hidden" id="todo-parent-id" name="parent_id">
         
         <div class="form-group">
             <label for="todo-title">Title *</label>
@@ -130,10 +113,58 @@
                 </select>
             </div>
         </div>
+
+        <div class="form-group">
+            <label for="todo-project">Project</label>
+            <select id="todo-project" name="project_id">
+                <option value="">No Project</option>
+            </select>
+        </div>
         
         <div class="form-group">
             <label for="todo-deadline">Deadline</label>
             <input type="datetime-local" id="todo-deadline" name="deadline">
+        </div>
+
+        <div id="checklist-section" style="display: none; border-top: 1px solid var(--border-color); margin-top: 15px; padding-top: 15px;">
+            <h4><i class="fas fa-tasks"></i> Checklist</h4>
+            <div id="checklist-items" style="margin-bottom: 10px;"></div>
+            <div class="form-row">
+                <input type="text" id="new-checklist-input" placeholder="Add an item..." style="flex: 1;">
+                <button type="button" class="btn btn-sm btn-primary" onclick="addChecklistItem()">Add</button>
+            </div>
+        </div>
+
+        <div id="custom-fields-section" style="display: none; border-top: 1px solid var(--border-color); margin-top: 15px; padding-top: 15px;">
+            <h4><i class="fas fa-puzzle-piece"></i> Custom Fields</h4>
+            <div id="custom-fields-container" class="form-row" style="flex-wrap: wrap;">
+                <!-- Fields loaded here -->
+            </div>
+        </div>
+
+        <div id="time-tracking-section" style="border-top: 1px solid var(--border-color); margin-top: 15px; padding-top: 15px; display: none;">
+            <h4><i class="fas fa-stopwatch"></i> Time Tracking</h4>
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                <button type="button" id="btn-start-timer" class="btn btn-sm btn-success" onclick="startTimeTracking()"><i class="fas fa-play"></i> Start Timer</button>
+                <button type="button" id="btn-stop-timer" class="btn btn-sm btn-danger" onclick="stopTimeTracking()" style="display:none;"><i class="fas fa-stop"></i> Stop Timer</button>
+                <span id="timer-display" style="font-family: monospace; font-size: 1.2rem;">00:00:00</span>
+            </div>
+            <div id="time-entries-list" style="font-size: 0.85rem; color: var(--text-muted);"></div>
+        </div>
+
+        <div id="ai-section" style="margin-top: 15px; display: none;">
+            <button type="button" class="btn btn-sm btn-secondary" onclick="aiSuggestSubtasks()"><i class="fas fa-magic"></i> AI Suggest Subtasks</button>
+        </div>
+
+        <div id="comments-section" style="display: none; border-top: 1px solid var(--border-color); margin-top: 20px; padding-top: 15px;">
+            <h4><i class="fas fa-comments"></i> Comments</h4>
+            <div id="comments-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+                <!-- Comments loaded here -->
+            </div>
+            <div class="form-row">
+                <input type="text" id="new-comment-input" placeholder="Write a comment... (@mention users)" style="flex: 1;">
+                <button type="button" class="btn btn-sm btn-primary" onclick="postComment()">Post</button>
+            </div>
         </div>
         
         <div class="form-actions">

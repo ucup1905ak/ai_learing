@@ -6,6 +6,7 @@
     <title>{% block title %}Todo App{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -15,22 +16,49 @@
             <h2><i class="fas fa-tasks"></i> TaskFlow</h2>
         </div>
         <ul class="nav-links">
-            <li class="{{ 'active' if request.endpoint == 'dashboard' }}">
-                <a href="{{ url_for('dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+            <li class="{{ 'active' if request.endpoint == 'views.dashboard' }}">
+                <a href="{{ url_for('views.dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
             </li>
-            <li class="{{ 'active' if request.endpoint == 'calendar' }}">
-                <a href="{{ url_for('calendar') }}"><i class="fas fa-calendar-alt"></i> Calendar</a>
+            <li class="{{ 'active' if request.endpoint == 'views.calendar' }}">
+                <a href="{{ url_for('views.calendar') }}"><i class="fas fa-calendar-alt"></i> Calendar</a>
             </li>
-            <li class="{{ 'active' if request.endpoint == 'users' }}">
-                <a href="{{ url_for('users') }}"><i class="fas fa-users"></i> Users & Sharing</a>
+            <li class="{{ 'active' if request.endpoint == 'views.users' }}">
+                <a href="{{ url_for('views.users') }}"><i class="fas fa-users"></i> Users & Sharing</a>
             </li>
         </ul>
+        <div class="projects-panel" style="padding: 0 20px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="color: var(--text-secondary); margin: 0;"><i class="fas fa-folder"></i> Projects</h4>
+                <button class="btn btn-sm btn-icon" onclick="openProjectModal()" title="Add New Project"><i class="fas fa-plus"></i></button>
+            </div>
+            <ul id="projects-list" style="list-style: none; padding: 0;">
+                <!-- Projects will be loaded here -->
+            </ul>
+        </div>
+        <div class="notifications-panel" style="padding: 0 20px; margin-bottom: 20px;">
+             <div id="notification-bell" style="cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text-secondary);" onclick="toggleNotifications()">
+                 <div style="position: relative;">
+                     <i class="fas fa-bell"></i>
+                     <span id="notif-badge" style="display: none; position: absolute; top: -5px; right: -5px; background: var(--danger-color); width: 8px; height: 8px; border-radius: 50%;"></span>
+                 </div>
+                 <span>Notifications</span>
+             </div>
+             <div id="notif-dropdown" class="hidden" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; margin-top: 10px; max-height: 200px; overflow-y: auto; font-size: 0.9rem;">
+                 <!-- Notifications loaded here -->
+             </div>
+        </div>
         <div class="sidebar-footer">
             <div class="user-info">
-                <i class="fas fa-user-circle"></i>
-                <span>{{ current_user.username }}</span>
+                {% if current_user.avatar and current_user.avatar != 'default_avatar.png' %}
+                    <img src="{{ url_for('static', filename='uploads/avatars/' + current_user.avatar) }}" alt="Avatar" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">
+                {% else %}
+                    <i class="fas fa-user-circle"></i>
+                {% endif %}
+                <a href="{{ url_for('profile.profile') }}" style="color: inherit; text-decoration: none;">
+                    <span>{{ current_user.username }}<span style="opacity: 0.6; font-size: 0.8em;">#{{ current_user.discriminator }}</span></span>
+                </a>
             </div>
-            <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </nav>
     {% endif %}

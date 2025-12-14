@@ -96,11 +96,54 @@ function renderCalendar() {
         const dayDate = new Date(year, month + 1, day);
         container.appendChild(createDayElement(day, dayDate, true));
     }
+
+    // Initialize Sortable for all days to allow moving events/tasks
+    const dayElements = container.querySelectorAll('.calendar-day');
+    dayElements.forEach(dayEl => {
+        new Sortable(dayEl.querySelector('.day-events'), {
+            group: 'calendar',
+            animation: 150,
+            onEnd: async function (evt) {
+                const itemEl = evt.item;
+                const newDateStr = evt.to.parentElement.dataset.date;
+                const itemId = itemEl.dataset.id;
+                const itemType = itemEl.dataset.type;
+                
+                if (evt.from !== evt.to) {
+                     // Date changed
+                     try {
+                         if (itemType === 'event') {
+                             // For events we need to keep time or reset? 
+                             // Simple approach: set start date to new date, keep time if not allDay
+                             const event = events.find(e => e.id == itemId);
+                             let newStart = newDateStr;
+                             if (event && !event.allDay) {
+                                 // Append original time
+                                 const originalTime = new Date(event.start).toTimeString().split(' ')[0];
+                                 newStart = `${newDateStr}T${originalTime}`;
+                             } else {
+                                 newStart = `${newDateStr}T09:00:00`; // Default time
+                             }
+                             
+                            await apiRequest(`/api/events/${itemId}`, 'PUT', { start: newStart });
+                         } else if (itemType === 'todo') {
+                            await apiRequest(`/api/todos/${itemId}`, 'PUT', { deadline: `${newDateStr}T12:00:00` });
+                         }
+                        
+                        loadCalendarData(); 
+                     } catch (error) {
+                         loadCalendarData(); // Revert
+                     }
+                }
+            }
+        });
+    });
 }
 
 function createDayElement(dayNum, date, isOtherMonth, isToday = false) {
     const dayEl = document.createElement('div');
     dayEl.className = 'calendar-day';
+    dayEl.dataset.date = date.toISOString().split('T')[0];
     
     if (isOtherMonth) dayEl.classList.add('other-month');
     if (isToday) dayEl.classList.add('today');
@@ -117,23 +160,31 @@ function createDayElement(dayNum, date, isOtherMonth, isToday = false) {
     const allItems = [...dayEvents.map(e => ({ ...e, type: 'event' })), 
                       ...dayTodos.map(t => ({ ...t, type: 'todo', color: '#f39c12' }))];
     
-    const displayItems = allItems.slice(0, 2);
-    const moreCount = allItems.length - displayItems.length;
+    // For drag and drop we need all items in DOM but maybe hidden? 
+    // Or just show top 2 and rely on "more" for list. 
+    // SortableJS needs elements to drag. 
+    // Let's render all but hide overflow via CSS or just render mini-dots for drag? 
+    // To support full D&D properly, we should render the actual draggable divs.
     
-    displayItems.forEach(item => {
-        eventsHtml += `<div class="day-event ${item.type}" style="background: ${item.color}">${escapeHtml(truncate(item.title, 15))}</div>`;
+    allItems.forEach(item => {
+        // Add data attributes for Sortable
+        eventsHtml += `<div class="day-event ${item.type}" style="background: ${item.color}" data-id="${item.id}" data-type="${item.type}">${escapeHtml(truncate(item.title, 15))}</div>`;
     });
-    
-    if (moreCount > 0) {
-        eventsHtml += `<div class="day-more">+${moreCount} more</div>`;
-    }
     
     dayEl.innerHTML = `
         <div class="day-number">${dayNum}</div>
         <div class="day-events">${eventsHtml}</div>
     `;
     
-    dayEl.addEventListener('click', () => openDayDetail(date, allItems));
+    // Clicking day number or empty space opens modal, but clicking event handles drag?
+    // We need to distinguish click vs drag. Sortable handles drag. 
+    // We add click listener to dayEl, but check target.
+    
+    dayEl.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('day-event')) {
+            openDayDetail(date, allItems);
+        }
+    });
     
     return dayEl;
 }
